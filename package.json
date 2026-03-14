@@ -1,0 +1,17 @@
+{
+  "name": "meownote",
+  "version": "1.0.0",
+  "description": "MeowNote — Cloudflare Worker + D1 笔记应用",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build:html": "node scripts/build-html.js",
+    "predeploy": "node scripts/build-html.js",
+    "db:init": "wrangler d1 execute meownote-db --remote --file=./schema.sql",
+    "db:init:local": "wrangler d1 execute meownote-db --local --file=./schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

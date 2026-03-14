@@ -6,5 +6,5 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "meownote-db"
-database_id = "YOUR_D1_DATABASE_ID"   # 替换成你的 D1 database_id
+database_id = "a54a0c11-0e57-4ea8-abc1-5e04885759d0"   # 替换成你的 D1 database_id
 

@@ -875,7 +875,7 @@ const aud=document.getElementById('aud');
    INIT
 ════════════════════════ */
 async function init(){
-  const m=location.pathname.match(/^\\/share\\/(\\w[\\w-]*)$/);
+  const m=location.pathname.match(/^\/share\/(\w[\w-]*)$/);
   if(m){await loadSharedPage(m[1]);return;}
   try{settings={...settings,...JSON.parse(localStorage.getItem('mn_cfg')||'{}')};}catch(e){}
   try{playlist=JSON.parse(localStorage.getItem('mn_pl')||'[]');}catch(e){}
@@ -1020,7 +1020,7 @@ function onCK(e){if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();
 function onTK(e){if(e.key==='Enter'||e.key===','){e.preventDefault();addCTag();}}
 function addCTag(){const i=document.getElementById('ctag-inp');const v=i.value.trim().replace(/^#/,'');if(!v||cTags.includes(v)){i.value='';return;}cTags.push(v);i.value='';renderCTags();}
 function removeCTag(t){cTags=cTags.filter(x=>x!==t);renderCTags();}
-function renderCTags(){document.getElementById('ctags').innerHTML=cTags.map(t=>\`<span class="ctag-pill">#\${esc(t)} <button onclick="removeCTag('\${esc(t)}')">✕</button></span>\`).join('');}
+function renderCTags(){document.getElementById('ctags').innerHTML=cTags.map(t=>`<span class="ctag-pill">#${esc(t)} <button onclick="removeCTag('${esc(t)}')">✕</button></span>`).join('');}
 function openCompose(){
   cColor='';cColorBase='';cStyle=0;cImages=[];
   const inp=document.getElementById('compose-inp');
@@ -1060,7 +1060,7 @@ async function submitMemo(){
   el.querySelectorAll('.mm-inline-img img').forEach(function(img){
     imgs.push({type:img.src.startsWith('data:')?'base64':'url',src:img.src});
   });
-  const memo={id,title:plain.split('\\n')[0].substring(0,60),content:html,tags:JSON.stringify(cTags),pinned:0,color:cColor,card_style:cStyle,images:JSON.stringify(imgs),canvas_x:null,canvas_y:null,created_at:now,updated_at:now};
+  const memo={id,title:plain.split('\n')[0].substring(0,60),content:html,tags:JSON.stringify(cTags),pinned:0,color:cColor,card_style:cStyle,images:JSON.stringify(imgs),canvas_x:null,canvas_y:null,created_at:now,updated_at:now};
   memos.unshift(memo);
   renderAll();
   el.innerHTML='';cTags=[];cColor='';cStyle=0;cImages=[];renderCTags();
@@ -1254,15 +1254,21 @@ function renderFeed(){
     if(m.color)bg=dark?(pal?pal.dark:m.color):(pal?pal.light:m.color);
     if(cs.id===4)bg=m.color?(bg+'cc'):(dark?'rgba(40,40,50,0.55)':'rgba(255,255,255,0.55)');
     const aColor=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#6366f1';
-    const outlineStyle=cs.id===6?\`outline-color:\${aColor}40;\`:'';
+    const outlineStyle=cs.id===6?`outline-color:${aColor}40;`:'';
     const isSel=selectedIds.has(m.id);
     const cImgs=extractCardImgs(m);
-    return \`<div class="memo-card \${cs.cls} \${m.pinned?'pinned':''} \${selectMode?'sel-mode':''} \${isSel?'selected':''}"\n      style="background:\${bg};transform:rotate(\${rot}deg);z-index:\${z};\${cs.id===1?'border-left-color:'+aColor+';':''}\${outlineStyle}"\n      onclick="onCardClick(event,'\${m.id}')">\n      <div class="mc-check">\${isSel?'\u2713':''}</div>\n      <div class="mc-content">\${esc((m.content||'').replace(/<[^>]+>/g,'').replace(/\\[图片\\]/g,'').trim())}</div>\n      \${cImgs.length?'<div class="mc-images">'+cImgs.slice(0,3).map(function(s){return '<img class="mc-thumb" src="'+s+'" onclick="event.stopPropagation();openLightbox(this.src)"/>';}).join('')+(cImgs.length>3?'<div class="mc-img-more">+'+( cImgs.length-3)+'</div>':'')+'</div>':''}\n      <div class="mc-footer">
-        \${tags.slice(0,2).map(t=>\`<span class="tag-pill" onclick="event.stopPropagation();setFilter('\${esc(t)}')">#\${esc(t)}</span>\`).join('')}
-        \${tags.length>2?\`<span style="font-size:10px;color:var(--text3)">+\${tags.length-2}</span>\`:''}
-        <span class="mc-time">\${dt}</span>
+    return `<div class="memo-card ${cs.cls} ${m.pinned?'pinned':''} ${selectMode?'sel-mode':''} ${isSel?'selected':''}"
+      style="background:${bg};transform:rotate(${rot}deg);z-index:${z};${cs.id===1?'border-left-color:'+aColor+';':''}${outlineStyle}"
+      onclick="onCardClick(event,'${m.id}')">
+      <div class="mc-check">${isSel?'\u2713':''}</div>
+      <div class="mc-content">${esc((m.content||'').replace(/<[^>]+>/g,'').replace(/\[图片\]/g,'').trim())}</div>
+      ${cImgs.length?'<div class="mc-images">'+cImgs.slice(0,3).map(function(s){return '<img class="mc-thumb" src="'+s+'" onclick="event.stopPropagation();openLightbox(this.src)"/>';}).join('')+(cImgs.length>3?'<div class="mc-img-more">+'+( cImgs.length-3)+'</div>':'')+'</div>':''}
+      <div class="mc-footer">
+        ${tags.slice(0,2).map(t=>`<span class="tag-pill" onclick="event.stopPropagation();setFilter('${esc(t)}')">#${esc(t)}</span>`).join('')}
+        ${tags.length>2?`<span style="font-size:10px;color:var(--text3)">+${tags.length-2}</span>`:''}
+        <span class="mc-time">${dt}</span>
       </div>
-    </div>\`;
+    </div>`;
   }).join('');
 }
 function onSearch(q){searchQ=q;renderFeed();}
@@ -1341,7 +1347,7 @@ function buildStylePicker(){
     const d=document.createElement('div');
     d.className='sp-swatch'+(editStyle===s.id?' sel':'');
     d.title=s.name;d.style.background=s.preview;
-    d.innerHTML=\`<span style="font-size:9px;color:var(--text2)">\${s.name}</span>\`;
+    d.innerHTML=`<span style="font-size:9px;color:var(--text2)">${s.name}</span>`;
     d.onclick=()=>selectStyle(s.id,d);
     el.appendChild(d);
   });
@@ -1364,7 +1370,7 @@ function hexToRgba(hex,op){
   return 'rgba('+r+','+g+','+b+','+(op/100).toFixed(2)+')';
 }
 function rgbaToHex(rgba){
-  const m=rgba.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+  const m=rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
   if(!m)return rgba;
   return '#'+[m[1],m[2],m[3]].map(function(x){return parseInt(x).toString(16).padStart(2,'0');}).join('');
 }
@@ -1435,7 +1441,7 @@ function selectColor(color,dotEl,custom=false){
 function syncColorToDot(color){
   editColor=color||'';
   if(color&&color.startsWith('rgba')){
-    const m2=color.match(/rgba?\\([\\d]+,[\\d]+,[\\d]+,([\\d.]+)\\)/);
+    const m2=color.match(/rgba?\([\d]+,[\d]+,[\d]+,([\d.]+)\)/);
     editOpacity=m2?Math.round(parseFloat(m2[1])*100):100;
   }else{editOpacity=100;}
   const sl=document.getElementById('cp-op-sl'),lbl=document.getElementById('cp-op-lbl');
@@ -1671,7 +1677,7 @@ function openMemoModal(id){
   editImages=ptImages(m.images);buildStylePicker();syncColorToDot(editColor);renderMmTags();renderMmImages();
   openModal('memo-modal');
 }
-function renderMmTags(){document.getElementById('mm-tags').innerHTML=editTags.map(t=>\`<span class="ctag-pill">#\${esc(t)} <button onclick="removeMMTag('\${esc(t)}')">✕</button></span>\`).join('');}
+function renderMmTags(){document.getElementById('mm-tags').innerHTML=editTags.map(t=>`<span class="ctag-pill">#${esc(t)} <button onclick="removeMMTag('${esc(t)}')">✕</button></span>`).join('');}
 function removeMMTag(t){editTags=editTags.filter(x=>x!==t);renderMmTags();mmMarkDirty();}
 function mmTagKey(e){if(e.key==='Enter'||e.key===','){e.preventDefault();const inp=document.getElementById('mm-tag-inp');const v=inp.value.trim().replace(/^#/,'');if(v&&!editTags.includes(v)){editTags.push(v);renderMmTags();mmMarkDirty();}inp.value='';}}
 let mmContentDirty=false,editOpacity=100,cOpacity=100;
@@ -1681,7 +1687,7 @@ async function mmSave(){
   clearTimeout(mmTimer);if(!editMemoId)return;
   const m=memos.find(x=>x.id===editMemoId);if(!m)return;
   const body=getMmBodyContent();
-  const {text,plainText,images}=parseMmBody();m.content=text;m.images=JSON.stringify(images);m.title=document.getElementById('mm-title').value.trim()||(plainText||'').split('\\n')[0].substring(0,60);m.tags=JSON.stringify(editTags);m.color=editColor;m.card_style=editStyle;if(mmContentDirty)m.updated_at=Date.now();mmContentDirty=false;
+  const {text,plainText,images}=parseMmBody();m.content=text;m.images=JSON.stringify(images);m.title=document.getElementById('mm-title').value.trim()||(plainText||'').split('\n')[0].substring(0,60);m.tags=JSON.stringify(editTags);m.color=editColor;m.card_style=editStyle;if(mmContentDirty)m.updated_at=Date.now();mmContentDirty=false;
   await apiU(m);mmDirty=false;
   document.getElementById('mm-hint').textContent='已保存';
   renderFeed();renderTags();renderHeatmap();
@@ -1733,7 +1739,7 @@ function renderHeatmap(){
   const now=new Date(today);now.setDate(now.getDate()+hmOffset);
   const end=new Date(now),start=new Date(now);start.setDate(start.getDate()-89);
   document.getElementById('hm-next-btn').style.opacity=hmOffset===0?'0.3':'1';
-  const fmt=d=>\`\${d.getFullYear()}-\${z(d.getMonth()+1)}-\${z(d.getDate())}\`;
+  const fmt=d=>`${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;
   const cm={};memos.forEach(m=>{const d=fmt(new Date(m.updated_at));cm[d]=(cm[d]||0)+1;});
   let weeks=[],week=[];
   const cur=new Date(start);while(cur.getDay()!==0)cur.setDate(cur.getDate()-1);
@@ -1743,10 +1749,10 @@ function renderHeatmap(){
   let ml=[];weeks.forEach((wk,wi)=>{const fv=wk.find(d=>d.inR);if(!fv)return;const dt=new Date(fv.d);if(dt.getDate()<=7)ml.push({wi,label:mons[dt.getMonth()]});});
   const nw=weeks.length;
   const mhEl=document.getElementById('hm-months');mhEl.style.width='100%';
-  mhEl.innerHTML=ml.map(m=>\`<span style="position:absolute;left:\${(m.wi/nw*100).toFixed(1)}%;font-size:11px;color:var(--text3);font-family:var(--mono)">\${m.label}</span>\`).join('');
-  document.getElementById('hm-grid').innerHTML=weeks.map(wk=>'<div class="hm-week">'+wk.map(cell=>{if(!cell.inR)return '<div class="hm-cell" style="opacity:0"></div>';const v=cell.c===0?0:cell.c===1?1:cell.c<=3?2:cell.c<=6?3:4;return \`<div class="hm-cell" data-v="\${v}" title="\${cell.d}: \${cell.c}条"></div>\`;}).join('')+'</div>').join('');
+  mhEl.innerHTML=ml.map(m=>`<span style="position:absolute;left:${(m.wi/nw*100).toFixed(1)}%;font-size:11px;color:var(--text3);font-family:var(--mono)">${m.label}</span>`).join('');
+  document.getElementById('hm-grid').innerHTML=weeks.map(wk=>'<div class="hm-week">'+wk.map(cell=>{if(!cell.inR)return '<div class="hm-cell" style="opacity:0"></div>';const v=cell.c===0?0:cell.c===1?1:cell.c<=3?2:cell.c<=6?3:4;return `<div class="hm-cell" data-v="${v}" title="${cell.d}: ${cell.c}条"></div>`;}).join('')+'</div>').join('');
   const sm=start.getMonth()+1,em=end.getMonth()+1,sy=start.getFullYear(),ey=end.getFullYear();
-  document.getElementById('hm-range').textContent=(sy===ey?sy:\`\${sy}-\${ey}\`)+\`年\${sm}-\${em}月\`;
+  document.getElementById('hm-range').textContent=(sy===ey?sy:`${sy}-${ey}`)+`年${sm}-${em}月`;
 }
 function renderStats(){const ts=new Set();memos.forEach(m=>{ptags(m.tags).forEach(t=>ts.add(t));});document.getElementById('st-m').textContent=memos.length;document.getElementById('st-t').textContent=ts.size;}
 
@@ -1758,7 +1764,7 @@ function renderTags(){
   const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]);
   const el=document.getElementById('tag-panel');
   if(!entries.length){el.innerHTML='<div class="tag-empty">暂无标签</div>';return;}
-  el.innerHTML=entries.map(([t,c])=>\`<div class="tag-row \${filterTag===t?'active':''}" onclick="setFilter('\${esc(t)}')"><div class="tag-dot"></div><div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">#\${esc(t)}</div><div class="tag-cnt">\${c}</div></div>\`).join('');
+  el.innerHTML=entries.map(([t,c])=>`<div class="tag-row ${filterTag===t?'active':''}" onclick="setFilter('${esc(t)}')"><div class="tag-dot"></div><div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">#${esc(t)}</div><div class="tag-cnt">${c}</div></div>`).join('');
 }
 
 /* ════════════════════════
@@ -1839,7 +1845,7 @@ function renderShareHistory(memoId){
 ════════════════════════ */
 let rvQ=[],rvI=0,rvRev=false;
 function startReview(){rvQ=shuffle(memos.filter(m=>m.content&&m.content.length>5));if(!rvQ.length){toast('暂无可复习的内容');return;}rvI=0;rvRev=false;document.getElementById('review-mode').style.display='flex';document.getElementById('rv-done').style.display='none';showRvCard();}
-function showRvCard(){if(rvI>=rvQ.length){document.getElementById('rv-done').style.display='block';['rv-hint','rv-acts','rv-card'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});document.getElementById('rv-total').textContent=rvQ.length;return;}const m=rvQ[rvI];document.getElementById('rv-card').style.display='flex';document.getElementById('rv-front').textContent=m.title||m.content.substring(0,40);const b=document.getElementById('rv-body');b.textContent=m.content;b.classList.add('blur');rvRev=false;document.getElementById('rv-acts').style.display='none';document.getElementById('rv-hint').style.display='block';document.getElementById('rv-prog').textContent=\`\${rvI+1} / \${rvQ.length}\`;}
+function showRvCard(){if(rvI>=rvQ.length){document.getElementById('rv-done').style.display='block';['rv-hint','rv-acts','rv-card'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});document.getElementById('rv-total').textContent=rvQ.length;return;}const m=rvQ[rvI];document.getElementById('rv-card').style.display='flex';document.getElementById('rv-front').textContent=m.title||m.content.substring(0,40);const b=document.getElementById('rv-body');b.textContent=m.content;b.classList.add('blur');rvRev=false;document.getElementById('rv-acts').style.display='none';document.getElementById('rv-hint').style.display='block';document.getElementById('rv-prog').textContent=`${rvI+1} / ${rvQ.length}`;}
 function revealRv(){if(rvRev)return;rvRev=true;document.getElementById('rv-body').classList.remove('blur');document.getElementById('rv-hint').style.display='none';document.getElementById('rv-acts').style.display='flex';}
 function rvNext(r){if(r==='fail')rvQ.push(rvQ[rvI]);rvI++;showRvCard();}
 function closeReview(){document.getElementById('review-mode').style.display='none';}
@@ -1874,7 +1880,7 @@ function toggleMusic(){document.getElementById('music-float').classList.toggle('
 function toggleEdge(){musicEdge=!musicEdge;document.getElementById('music-float').classList.toggle('edge-hide',musicEdge);document.getElementById('edge-btn').textContent=musicEdge?'←':'→';}
 function toggleMin(){musicMin=!musicMin;document.getElementById('mf-body').style.display=musicMin?'none':'block';document.getElementById('min-btn').textContent=musicMin?'+':'−';}
 function setupAudio(){aud.addEventListener('timeupdate',updProg);aud.addEventListener('ended',()=>loopOn?(aud.currentTime=0,aud.play()):plNext());aud.volume=0.8;if(playlist.length)loadTrack(0,false);}
-function loadTrack(i,play=true){if(!playlist.length)return;plIdx=i<0?playlist.length-1:i>=playlist.length?0:i;const t=playlist[plIdx];aud.src=t.url;document.getElementById('mf-song').textContent=t.name||'未知';document.getElementById('mf-artist').textContent=t.artist||'';const th=document.getElementById('mf-thumb');th.innerHTML=t.cover?\`<img src="\${esc(t.cover)}" onerror="this.parentNode.innerHTML='♪'"/>\`:'♪';if(play)aud.play().then(()=>{isPlaying=true;updPlayBtn();}).catch(()=>{});renderPlaylist();}
+function loadTrack(i,play=true){if(!playlist.length)return;plIdx=i<0?playlist.length-1:i>=playlist.length?0:i;const t=playlist[plIdx];aud.src=t.url;document.getElementById('mf-song').textContent=t.name||'未知';document.getElementById('mf-artist').textContent=t.artist||'';const th=document.getElementById('mf-thumb');th.innerHTML=t.cover?`<img src="${esc(t.cover)}" onerror="this.parentNode.innerHTML='♪'"/>`:'♪';if(play)aud.play().then(()=>{isPlaying=true;updPlayBtn();}).catch(()=>{});renderPlaylist();}
 function togglePlay(){if(!playlist.length){openModal('music-overlay');return;}if(isPlaying){aud.pause();isPlaying=false;}else{aud.play();isPlaying=true;}updPlayBtn();}
 function updPlayBtn(){document.getElementById('play-btn').textContent=isPlaying?'⏸':'▶';}
 function plNext(){loadTrack(shuffleOn?Math.floor(Math.random()*playlist.length):plIdx+1);}
@@ -1884,7 +1890,7 @@ function toggleLoop(){loopOn=!loopOn;document.getElementById('loop-btn').style.c
 function updProg(){if(!aud.duration)return;document.getElementById('mf-fill').style.width=(aud.currentTime/aud.duration*100).toFixed(1)+'%';document.getElementById('mf-cur').textContent=fmtT(aud.currentTime);document.getElementById('mf-dur').textContent=fmtT(aud.duration);}
 function seekAudio(e){const b=e.currentTarget,r=b.getBoundingClientRect();aud.currentTime=((e.clientX-r.left)/r.width)*aud.duration;}
 function setVol(e){const b=e.currentTarget,r=b.getBoundingClientRect(),v=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));aud.volume=v;document.getElementById('vol-fill').style.width=(v*100)+'%';}
-function renderPlaylist(){const el=document.getElementById('mf-playlist');if(!playlist.length){el.innerHTML='';return;}el.innerHTML=playlist.map((t,i)=>\`<div class="pli \${i===plIdx?'playing':''}" onclick="loadTrack(\${i})"><span class="pli-num">\${i+1}</span><span class="pli-name">\${esc(t.name||'未知')}</span><button class="pli-del" onclick="event.stopPropagation();removeTrk(\${i})">✕</button></div>\`).join('');}
+function renderPlaylist(){const el=document.getElementById('mf-playlist');if(!playlist.length){el.innerHTML='';return;}el.innerHTML=playlist.map((t,i)=>`<div class="pli ${i===plIdx?'playing':''}" onclick="loadTrack(${i})"><span class="pli-num">${i+1}</span><span class="pli-name">${esc(t.name||'未知')}</span><button class="pli-del" onclick="event.stopPropagation();removeTrk(${i})">✕</button></div>`).join('');}
 function addTrack(){const n=document.getElementById('mus-name').value.trim(),a=document.getElementById('mus-artist').value.trim(),u=document.getElementById('mus-url').value.trim(),c=document.getElementById('mus-cover').value.trim();if(!u){toast('请填写音频地址');return;}playlist.push({name:n||u.split('/').pop().split('?')[0],artist:a,url:u,cover:c});localStorage.setItem('mn_pl',JSON.stringify(playlist));renderPlaylist();if(playlist.length===1)loadTrack(0,false);closeModal('music-overlay');['mus-name','mus-artist','mus-url','mus-cover'].forEach(id=>document.getElementById(id).value='');toast('已添加');}
 function removeTrk(i){playlist.splice(i,1);localStorage.setItem('mn_pl',JSON.stringify(playlist));if(plIdx>=playlist.length)plIdx=Math.max(0,playlist.length-1);if(playlist.length)loadTrack(plIdx,false);else{aud.src='';isPlaying=false;updPlayBtn();document.getElementById('mf-song').textContent='未播放';document.getElementById('mf-artist').textContent='';document.getElementById('mf-thumb').innerHTML='♪';}renderPlaylist();}
 
